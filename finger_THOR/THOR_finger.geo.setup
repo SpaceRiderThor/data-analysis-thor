@@ -1,0 +1,34 @@
+//Name THOR_2023
+//Version 0.1
+
+Include ./materials/Materials.geo
+
+SurroundingSphere 20.0  0.0  0.0  0.0  20.0
+ShowSurroundingSphere false
+
+Volume World
+World.Material Vacuum
+World.Visibility 0
+World.Color 0
+World.Shape BRIK 500. 500. 500.
+World.Mother 0
+
+////////////////VOLUMES/////////////////////////////
+
+Volume THOR
+THOR.Shape BOX 10.0 10.0 10.0
+THOR.Material Vacuum
+THOR.Visibility 1
+THOR.Position 0.0 0.0 0.0
+THOR.Mother World
+
+# Includes Geometries and Detectors
+Include ./finger/volumes.geo
+Include ./finger/pixcdte.det
+
+////////////////TRIGGER CRITERIA/////////////////////////////
+
+Trigger Main
+# Main.Veto false
+# Main.TriggerByDetector true
+Main.Detector CdTeDetector 1
