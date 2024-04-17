@@ -28,15 +28,11 @@ inline void rtrim(string &s) {
 void create_output_file(vector<vector<string>> data) {
     ofstream outFile("dados.evta");
 
-    //outFile.setf(ios::fixed);
-    //outFile.precision(9);
 
     if (outFile.is_open()) {
         outFile << "Version 200\n";
         outFile << "Type EVTA\n\n";
         
-        //cout << data.size();    
-
         int cont = 1;
         for(int i = 0; i < data.size(); i++) {
             if(i == 0 || (stoi(data[i][1]) % 256) == 0 || (stoi(data[i][1]) % 256) == 255 || (stoi(data[i][1])/256) == 0 || (stoi(data[i][1])/256) == 255){
@@ -130,8 +126,6 @@ void convert_energy(vector<vector<string>>& data) {
     fileT.close();
     s = "";
 
-    //cout << setprecision(7) << a_list[10][11]; //[y][x]
-
     // replace ToT with Energy in KeV
     for(int i = 0; i < data.size(); i++){ //data.size()
         if(i == 0) {
@@ -143,11 +137,7 @@ void convert_energy(vector<vector<string>>& data) {
         c = c_list[stoi(data[i][1])/256][stoi(data[i][1]) % 256];
         t = t_list[stoi(data[i][1])/256][stoi(data[i][1]) % 256];
 
-        //cout << "a: " << a << " b: " << b << " c: " << c << " t: " << t << endl;
-
-        float e = ((t*a - b + stoi(data[i][3]))/(2*a)) + sqrt(pow((t*a - b + stoi(data[i][3]))/(2*a), 2) - (t * (stoi(data[i][3]) - b) - c)/a);
-                    
-        //cout << "Index: " << data[i][0] << setprecision(7) << " energy: " << e << endl;
+        float e = ((t*a - b + stoi(data[i][3]))/(2*a)) + sqrt(pow((t*a - b + stoi(data[i][3]))/(2*a), 2) - (t * (stoi(data[i][3]) - b) - c)/a);   
 
         data[i][3] = to_string(e);
     }
@@ -157,11 +147,6 @@ void convert_energy(vector<vector<string>>& data) {
 int main(int argc, char* argv[])
 {
     fstream MyReadFile("Ba133_colimated1cm-calibrated.t3pa");
-    //ifstream MyReadFile("Am241-gammaAlphas/Am241-test1-1.t3pa");
-    //ifstream MyReadFile("Ba133-pointsource/Ba133-point-source-1.t3pa");
-    //ifstream MyReadFile("Larix-measurement24_betatron_on_with_polarizer_60s_1Mev_13-03-merged.txt");
-    //ifstream MyReadFile("Larix-measurement24_betatron_on_with_polarizer_60s_1Mev_13-03-6.t3pa");
-    //ifstream MyReadFile("Larix-measurement21_betatron_on_no_polarizer_60s_1Mev_13-03-6.t3pa");
 
     vector<vector<string>> values; 
 
@@ -169,7 +154,6 @@ int main(int argc, char* argv[])
     string s;
     while (getline (MyReadFile, s)) { // && i < 200
         // Output the text from the file
-        //cout << "Inicio da linha ";
 
         vector<string> t;
         stringstream ss(s);
@@ -185,7 +169,6 @@ int main(int argc, char* argv[])
         t.clear();
 
         i++;
-        //cout << endl;
     }
 
     MyReadFile.close();
