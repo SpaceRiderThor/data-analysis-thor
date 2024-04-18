@@ -1,0 +1,7 @@
+*/*.t3pa
+!*/Ba133_colimated1cm-calibrated.t3pa
+
+*/*.evta
+*/output
+*/output.exe
+*/ABCT_Files/

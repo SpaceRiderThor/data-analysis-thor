@@ -7,6 +7,8 @@
 #include <iomanip>
 #include <string.h>
 #include <cmath>
+#include <cerrno>
+#include <cstring>
 
 using namespace std;
 
@@ -26,8 +28,9 @@ inline void rtrim(string &s) {
 }
 
 void create_output_file(vector<vector<string>> data) {
-    ofstream outFile("dados.evta");
+    cout << "Writing data to output file..." << endl;
 
+    ofstream outFile("dados.evta");
 
     if (outFile.is_open()) {
         outFile << "Version 200\n";
@@ -57,13 +60,15 @@ void create_output_file(vector<vector<string>> data) {
 
         // Close the file
         outFile.close();
-        cout << "Data has been written to output the file.\n";
+        cout << "Data has been written!\n";
     } else {
         cerr << "Error: Unable to write into output file.\n";
     }
 }
 
 void convert_energy(vector<vector<string>>& data) {
+    cout << "Converting energy from ToT to KeV..." << endl;
+
     // read abct files
     vector<vector<double>> a_list, b_list, c_list, t_list;
     float a, b, c, t;
@@ -142,36 +147,47 @@ void convert_energy(vector<vector<string>>& data) {
         data[i][3] = to_string(e);
     }
 
+    cout << "Conversion finished!" << endl;
+
 }
 
 int main(int argc, char* argv[])
 {
-    fstream MyReadFile("Ba133_colimated1cm-calibrated.t3pa");
+    fstream MyReadFile("Ba133_3600s_cut.t3pa");
+    //fstream MyReadFile("Ba133_colimated1cm-calibrated.t3pa");
+    //fstream MyReadFile("Larix-measurement24_betatron_on_with_polarizer_60s_1Mev_13-03-merged.t3pa");
+
 
     vector<vector<string>> values; 
 
-    int i = 0;
-    string s;
-    while (getline (MyReadFile, s)) { // && i < 200
-        // Output the text from the file
+    if(MyReadFile.is_open()) {
+        int i = 0;
+        string s;
+        while (getline (MyReadFile, s)) { // && i < 200
+            // Output the text from the file
 
-        vector<string> t;
-        stringstream ss(s);
-        string token;
-        while(getline(ss, token, '\t')) {
-            ltrim(token);
-            rtrim(token);
+            vector<string> t;
+            stringstream ss(s);
+            string token;
+            while(getline(ss, token, '\t')) {
+                ltrim(token);
+                rtrim(token);
 
-            t.push_back(token);
+                t.push_back(token);
+            }
+
+            values.push_back(t);
+            t.clear();
+
+            i++;
         }
 
-        values.push_back(t);
-        t.clear();
-
-        i++;
+        MyReadFile.close();
+    } else {
+        cerr << "Unable to open file: " << strerror(errno) << endl;
+        return 0;
     }
-
-    MyReadFile.close();
+    
 
     if (argc == 2 && strcmp(argv[1], "-c") == 0) {
         convert_energy(values);
