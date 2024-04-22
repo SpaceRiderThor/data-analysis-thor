@@ -4,6 +4,12 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <iomanip>
+#include <string.h>
+#include <cmath>
+#include <cerrno>
+#include <cstring>
+
 
 #define filename "dados.evta"
 
@@ -98,7 +104,92 @@ void output_end(){
 
 }
 
-int main() {
+void convert_energy(vector<vector<string>>& data) {
+    cout << "Converting energy from ToT to KeV..." << endl;
+
+    // read abct files
+    vector<vector<double>> a_list, b_list, c_list, t_list;
+    float a, b, c, t;
+    ifstream fileA("ABCT_Files/Files_a.txt");// , fileC("ABCT_Files/Files_c.txt"), fileT("ABCT_Files/Files_t.txt");
+    string s;
+    vector<double> temp;
+
+    while(getline(fileA, s)) {
+        stringstream ss(s);
+        string token;
+        while(getline(ss, token, ' ')) {
+            temp.push_back(stof(token));
+        }
+
+        a_list.push_back(temp);
+        temp.clear();
+    }
+    fileA.close();
+    s = "";
+
+    ifstream fileB("ABCT_Files/Files_b.txt");
+    while(getline(fileB, s)) {
+        stringstream ss(s);
+        string token;
+        while(getline(ss, token, ' ')) {
+            temp.push_back(stof(token));
+        }
+
+        b_list.push_back(temp);
+        temp.clear();
+    }
+    fileB.close();
+    s = "";
+
+    ifstream fileC("ABCT_Files/Files_c.txt");
+    while(getline(fileC, s)) {
+        stringstream ss(s);
+        string token;
+        while(getline(ss, token, ' ')) {
+            temp.push_back(stof(token));
+        }
+
+        c_list.push_back(temp);
+        temp.clear();
+    }
+    fileC.close();
+    s = "";
+
+    ifstream fileT("ABCT_Files/Files_t.txt");
+    while(getline(fileT, s)) {
+        stringstream ss(s);
+        string token;
+        while(getline(ss, token, ' ')) {
+            temp.push_back(stof(token));
+        }
+
+        t_list.push_back(temp);
+        temp.clear();
+    }
+    fileT.close();
+    s = "";
+
+    // replace ToT with Energy in KeV
+    for(int i = 0; i < data.size(); i++){ //data.size()
+        if(i == 0) {
+            continue;
+        }
+
+        a = a_list[stoi(data[i][1])/256][stoi(data[i][1]) % 256];
+        b = b_list[stoi(data[i][1])/256][stoi(data[i][1]) % 256];
+        c = c_list[stoi(data[i][1])/256][stoi(data[i][1]) % 256];
+        t = t_list[stoi(data[i][1])/256][stoi(data[i][1]) % 256];
+
+        float e = ((t*a - b + stoi(data[i][3]))/(2*a)) + sqrt(pow((t*a - b + stoi(data[i][3]))/(2*a), 2) - (t * (stoi(data[i][3]) - b) - c)/a);   
+
+        data[i][3] = to_string(e);
+    }
+
+    cout << "Conversion finished!" << endl;
+
+}
+
+int main(int argc, char* argv[]) {
     //TODO escrever os valores de cada ficheiro
 
     output_beginning();
@@ -142,6 +233,10 @@ int main() {
 
             values.push_back(t);
             t.clear();
+        }
+
+        if (argc == 2 && strcmp(argv[1], "-c") == 0) {
+            convert_energy(values);
         }
 
         eventId = output_content(values, i, eventId);
