@@ -2,5 +2,6 @@
 !*/Ba133_colimated1cm-calibrated.t3pa
 
 */*.evta
+*/*.tra
 */output
 */output.exe

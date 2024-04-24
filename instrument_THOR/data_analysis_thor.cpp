@@ -71,7 +71,7 @@ int output_content(vector<vector<string>> data, int detectorId, int eventId, flo
 
             double time = (stod(data[i][2])*25 - stod(data[i][4])*1.5625) * 1e-9;
             outFile << "TI " << time << "\n";
-            outFile << "HT 8;" << (stoi(data[i][1]) % 256)*0.0055 + offset << ";" << (stoi(data[i][1])/256)*0.0055 << ";" << z << ";" << stoi(data[i][3]) << ";" << 0.00275 << ";" << 0.00275 << ";" << 0.00275 << ";" << 0.5 << ";\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
+            outFile << "HT 8;" << (stoi(data[i][1]) % 256)*0.0055 + offset << ";" << (stoi(data[i][1])/256)*0.0055 + 1.546 << ";" << z << ";" << stoi(data[i][3]) << ";" << 0.00275 << ";" << 0.00275 << ";" << 0.00275 << ";" << 0.5 << ";\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
 
         }
 
