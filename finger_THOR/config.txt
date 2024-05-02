@@ -1,0 +1,7 @@
+bottomLeftCorner 0.0 0.0
+height 0.0
+sizePixel 0.0055
+numberPixels 256 256
+energy kev
+dataFile Ba133_colimated1cm-calibrated.t3pa
+
