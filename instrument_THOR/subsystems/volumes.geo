@@ -13,11 +13,11 @@ Volume FINGERCDTE
 FINGERCDTE.Material Vacuum
 FINGERCDTE.Color 1
 FINGERCDTE.Visibility 1
-FINGERCDTE.Shape BOX 0.7 2.25 0.1
+FINGERCDTE.Shape BOX 0.704 2.25 0.1
 
 ////////////////MOTHER_VOLUMES////////////////
 
-PIXCDTE.Position 0.0 0.0 0.0
+PIXCDTE.Position 0.0 1.546 0.0
 PIXCDTE.Mother FINGERCDTE
 
 ////////////////DUMMY_VOLUMES////////////////

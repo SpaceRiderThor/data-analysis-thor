@@ -86,7 +86,7 @@ revan -g THOR.geo.setup -f dados.evta -c THOR.cfg
 
 
 ### Energy conversion from ToT to KeV
-if your *.evta* file's first line looks like this:
+if your *.t3pa* file's first line looks like this:
 
 ![Alt text](images/t3pa_tot.png ".t3pa file ToT")
 
