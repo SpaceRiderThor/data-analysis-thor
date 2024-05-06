@@ -21,8 +21,8 @@ double bottomLeftX;
 double bottomLeftY;
 double height;
 double sizePixel;
-int detectorSizeX;
-int detectorSizeY;
+double detectorSizeX;
+double detectorSizeY;
 string energy;
 
 double spacing_1_2;
@@ -181,8 +181,8 @@ int readConfig(){
         spacing_2_3 = stod(configValues[3][2]);
         spacing_3_4 = stod(configValues[3][3]);
         sizePixel = stod(configValues[4][1]);
-        detectorSizeX = stoi(configValues[5][1]);
-        detectorSizeY = stoi(configValues[5][2]);
+        detectorSizeX = stod(configValues[5][1]);
+        detectorSizeY = stod(configValues[5][2]);
         if(configValues[6][1] == "kev" || configValues[6][1] == "tot") {
             energy = configValues[6][1];
         } else {
@@ -198,7 +198,12 @@ int readConfig(){
         return 1;
     }
 
-    
+    for(int i = 0; i < configValues.size(); i++) {
+        for(int j = 0; j < configValues[i].size(); j++) {
+            cout << configValues[i][j] << " ";
+        }
+        cout << endl;
+    }    
 
     return 0;
 }
