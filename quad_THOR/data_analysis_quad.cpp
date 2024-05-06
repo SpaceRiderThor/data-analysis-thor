@@ -45,7 +45,6 @@ void output_beginning(){
     }
 }
 
-//TODO func que recebe os valores de cada ficheiro e adiciona ao output
 int output_content(vector<vector<string>> data, int detectorId, int eventId){
     float offset; //1.408 -> detector length
     if(detectorId == 0) {

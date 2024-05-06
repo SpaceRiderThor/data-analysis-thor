@@ -5,3 +5,7 @@
 */*.tra
 */output
 */output.exe
+
+*.evta
+output
+output.exe
