@@ -17,9 +17,31 @@ using namespace std;
 
 string mode;
 string inputFileName;
+
 double bottomLeftX;
 double bottomLeftY;
 double height;
+bool rotated;
+bool inverted;
+
+double bottomLeft1X;
+double bottomLeft1Y;
+double height1;
+bool rotated1;
+bool inverted1;
+
+double bottomLeft2X;
+double bottomLeft2Y;
+double height2;
+bool rotated2;
+bool inverted2;
+
+double bottomLeft3X;
+double bottomLeft3Y;
+double height3;
+bool rotated3;
+bool inverted3;
+
 double sizePixel;
 double detectorSizeX;
 double detectorSizeY;
@@ -131,6 +153,8 @@ void convert_energy(vector<vector<string>>& data) {
 }
 
 int readConfig(){
+    cout << "Reading configuration file..." << endl;
+
     fstream configFile("config.txt");
     vector<vector<string>> configValues;
     if (configFile.is_open()){
@@ -155,6 +179,7 @@ int readConfig(){
         cerr << "Unable to open config file: " << strerror(errno) << endl;
         return 1;
     }
+
 
     mode = configValues[0][1];
 
@@ -192,6 +217,44 @@ int readConfig(){
         inputFileName = configValues[7][1];
 
     } else if (mode == "instrument") {
+        bottomLeftX = stod(configValues[1][1]);
+        bottomLeftY = stod(configValues[1][2]);
+        height = stod(configValues[5][1]);
+        rotated = stoi(configValues[6][1]);
+        inverted = stoi(configValues[7][1]);
+
+        bottomLeft1X = stod(configValues[2][1]);
+        bottomLeft1Y = stod(configValues[2][2]);
+        height1 = stod(configValues[5][2]);
+        rotated1 = stoi(configValues[6][2]);
+        inverted1 = stoi(configValues[7][2]);
+
+        bottomLeft2X = stod(configValues[3][1]);
+        bottomLeft2Y = stod(configValues[3][2]);
+        height2 = stod(configValues[5][3]);
+        rotated2 = stoi(configValues[6][3]);
+        inverted2 = stoi(configValues[7][3]);
+
+        bottomLeft3X = stod(configValues[4][1]);
+        bottomLeft3Y = stod(configValues[4][2]);
+        height3 = stod(configValues[5][4]);
+        rotated3 = stoi(configValues[6][4]);
+        inverted3 = stoi(configValues[7][4]);
+
+        spacing_1_2 = stod(configValues[8][1]);
+        spacing_2_3 = stod(configValues[8][2]);
+        spacing_3_4 = stod(configValues[8][3]);
+
+        sizePixel = stod(configValues[9][1]);
+        detectorSizeX = stod(configValues[10][1]);
+        detectorSizeY = stod(configValues[10][2]);
+        if(configValues[11][1] == "kev" || configValues[11][1] == "tot") {
+            energy = configValues[11][1];
+        } else {
+            cerr << "Wrong energy value in config file! Must be either \"kev\" or \"tot\"!" << endl;
+            return 1;
+        }
+        inputFileName = configValues[12][1];
 
     } else {
         cerr << "Wrong mode selected in config file!" << endl;
@@ -306,7 +369,7 @@ void output_beginning(){
     }
 }
 
-int output_content(vector<vector<string>> data, int detectorId, int eventId){
+int output_content(vector<vector<string>> data, int detectorId, int eventId, double bLeftX, double bLeftY, double z){
     float offset; //detextorSizeX -> detector length
     if(detectorId == 0) {
         offset = 0; 
@@ -337,7 +400,7 @@ int output_content(vector<vector<string>> data, int detectorId, int eventId){
 
             double time = (stod(data[i][2])*25 - stod(data[i][4])*1.5625) * 1e-9;
             outFile << "TI " << std::setprecision(9) << time << "\n";
-            outFile << "HT 8;" << ((stoi(data[i][1]) % 256))*sizePixel + bottomLeftX + offset << ";" << ((stoi(data[i][1])/256))*sizePixel + bottomLeftY << ";" << height << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
+            outFile << "HT 8;" << ((stoi(data[i][1]) % 256))*sizePixel + bLeftX + offset << ";" << ((stoi(data[i][1])/256))*sizePixel + bLeftY << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
 
         }
 
@@ -386,7 +449,7 @@ int quad(){
 
     for(int i = 0; i < files.size(); i++) {
         s = "";
-        fstream MyReadFile(files[0]);
+        fstream MyReadFile(files[i]);
 
         while (getline(MyReadFile, s)) {
             vector<string> t;
@@ -407,8 +470,71 @@ int quad(){
             convert_energy(values);
         }
 
-        eventId = output_content(values, i, eventId);
+        eventId = output_content(values, i, eventId, bottomLeftX, bottomLeftY, height);
         values.clear();
+    }
+
+    output_end();
+
+    return 0;
+}
+
+
+// ------------------------------- INSTRUMENT
+
+int instrument(){
+    output_beginning();
+
+    //get files from folder
+    vector<string> files;
+    for (const auto &entry : fs::directory_iterator(inputFileName)) { 
+        if (fs::is_regular_file(entry.path())) {
+            //cout << entry.path() << endl;
+            //ifstream file(entry.path());
+            files.push_back(entry.path().string());
+        }
+    }
+
+    int eventId = 1;
+    string s = "";
+    for (int i = 0; i < files.size(); i++){
+        cout << "Current file: " << files[i] << endl;
+
+
+        fstream MyReadFile(files[i]);
+        vector<vector<string>> values;
+        s = "";
+        while (getline(MyReadFile, s)) {
+            vector<string> t;
+            stringstream ss(s);
+            string token;
+            while(getline(ss, token, '\t')) {
+                ltrim(token);
+                rtrim(token);
+
+                t.push_back(token);
+            }
+
+            values.push_back(t);
+            t.clear();
+        }
+
+        if (energy == "tot") {
+            convert_energy(values);
+        }   
+
+        if(i < 4) { //first (uppermost) quad
+            eventId = output_content(values, i, eventId, bottomLeftX, bottomLeftY, height);
+        } else if (i >= 4 && i < 8) { //second
+            eventId = output_content(values, i, eventId, bottomLeft1X, bottomLeft1Y, height1);
+        } else if (i >= 8 && i < 12) { //third
+            eventId = output_content(values, i, eventId, bottomLeft2X, bottomLeft2Y, height2);
+        } else { // >= 12, fourth
+            eventId = output_content(values, i, eventId, bottomLeft3X, bottomLeft3Y, height3);
+        }
+        values.clear();
+
+        cout << "File " << i << " done." << endl;
     }
 
     output_end();
@@ -422,6 +548,7 @@ int main()
     if(readConfig() == 1) {
         return 1;
     }
+    cout << "Configuration file successfully read!";
 
     /*cout << bottomLeftX << " " << bottomLeftY << endl;
     cout << height << endl;
@@ -442,7 +569,9 @@ int main()
         }
     } else if (mode == "instrument") {
         cout << "Processing instrument data..." << endl;
-
+        if(instrument() == 1) {
+            return 1;
+        }
     } else {
         cerr << "Wrong mode selected in config file!" << endl;
         return 1;

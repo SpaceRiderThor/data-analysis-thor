@@ -1,5 +1,7 @@
-*/*.t3pa
-!*/Ba133_colimated1cm-calibrated.t3pa
+*.t3pa
+!data_files/Ba133_colimated1cm-calibrated.t3pa
+!data_files/quad_test/*
+!data_files/instrument_test/*
 
 */*.evta
 */*.tra

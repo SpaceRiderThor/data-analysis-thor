@@ -1,9 +1,14 @@
-mode quad
-bottomLeftCorner 0.0 0.0
-height 0.0
+mode instrument
+bottomLeftCorner0 0.0 0.0
+bottomLeftCorner1 0.0 0.0
+bottomLeftCorner2 0.0 0.0
+bottomLeftCorner3 0.0 0.0
+height 0.0 0.38 2.38 2.76
+rotated 0 1 0 1
+inverted 1 0 1 0
 spaceBetween 0.1 0.5 0.1
 sizePixel 0.0055
 detectorSize 1.408 1.408
 energy kev
-dataFile data_files/quad_test
+dataFile data_files/instrument_test
 
