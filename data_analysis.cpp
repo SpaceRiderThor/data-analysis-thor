@@ -220,26 +220,58 @@ int readConfig(){
         bottomLeftX = stod(configValues[1][1]);
         bottomLeftY = stod(configValues[1][2]);
         height = stod(configValues[5][1]);
-        rotated = stoi(configValues[6][1]);
-        inverted = stoi(configValues[7][1]);
+        if(stoi(configValues[6][1]) == 1) {
+            rotated = true;
+        } else { 
+            rotated = false; 
+        }
+        if(stoi(configValues[7][1]) == 1) {
+            inverted = true;
+        } else {
+            inverted = false;
+        }
 
         bottomLeft1X = stod(configValues[2][1]);
         bottomLeft1Y = stod(configValues[2][2]);
         height1 = stod(configValues[5][2]);
-        rotated1 = stoi(configValues[6][2]);
-        inverted1 = stoi(configValues[7][2]);
+        if (stoi(configValues[6][2]) == 1) {
+            rotated1 = true;
+        } else {
+            rotated1 = false;
+        }
+        if (stoi(configValues[7][2]) == 1) {
+            inverted1 = true;
+        } else {
+            inverted1 = false;
+        }
 
         bottomLeft2X = stod(configValues[3][1]);
         bottomLeft2Y = stod(configValues[3][2]);
         height2 = stod(configValues[5][3]);
-        rotated2 = stoi(configValues[6][3]);
-        inverted2 = stoi(configValues[7][3]);
+        if(stoi(configValues[6][3]) == 1) {
+            rotated2 = true;
+        } else {
+            rotated2 = false;
+        }
+        if(stoi(configValues[7][3]) == 1) {
+            inverted2 = true;
+        } else {
+            inverted2 = false;
+        }
 
         bottomLeft3X = stod(configValues[4][1]);
         bottomLeft3Y = stod(configValues[4][2]);
         height3 = stod(configValues[5][4]);
-        rotated3 = stoi(configValues[6][4]);
-        inverted3 = stoi(configValues[7][4]);
+        if(stoi(configValues[6][4]) == 1) {
+            rotated3 = true;
+        } else {
+            rotated3 = false;
+        }
+        if(stoi(configValues[7][4]) == 1) {
+            inverted3 == true;
+        } else {
+            inverted3 == false;
+        }
 
         spacing_1_2 = stod(configValues[8][1]);
         spacing_2_3 = stod(configValues[8][2]);
@@ -369,7 +401,7 @@ void output_beginning(){
     }
 }
 
-int output_content(vector<vector<string>> data, int detectorId, int eventId, double bLeftX, double bLeftY, double z){
+int output_content(vector<vector<string>> data, int detectorId, int eventId, double bLeftX, double bLeftY, double z, bool rot, bool inv){
     float offset; //detextorSizeX -> detector length
     if(detectorId % 4 == 0) {
         offset = 0; 
@@ -400,7 +432,12 @@ int output_content(vector<vector<string>> data, int detectorId, int eventId, dou
 
             double time = (stod(data[i][2])*25 - stod(data[i][4])*1.5625) * 1e-9;
             outFile << "TI " << std::setprecision(9) << time << "\n";
-            outFile << "HT 8;" << ((stoi(data[i][1]) % 256))*sizePixel + bLeftX + offset << ";" << ((stoi(data[i][1])/256))*sizePixel + bLeftY << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
+
+            if(rot == false || inv == false) {
+                outFile << "HT 8;" << ((stoi(data[i][1]) % 256))*sizePixel + bLeftX + offset << ";" << ((stoi(data[i][1])/256))*sizePixel + bLeftY << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
+            } else {
+                outFile << "HT 8;" << 1.408 - (((stoi(data[i][1]) % 256))*sizePixel + bLeftX) + offset << ";" << 1.408 - (((stoi(data[i][1])/256))*sizePixel + bLeftY) << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
+            }
 
         }
 
@@ -472,7 +509,7 @@ int quad(){
             convert_energy(values);
         }
 
-        eventId = output_content(values, i, eventId, bottomLeftX, bottomLeftY, height);
+        eventId = output_content(values, i, eventId, bottomLeftX, bottomLeftY, height, false, false);
         values.clear();
     }
 
@@ -528,13 +565,13 @@ int instrument(){
         }   
 
         if(i < 4) { //first (uppermost) quad
-            eventId = output_content(values, i, eventId, bottomLeftX, bottomLeftY, height);
+            eventId = output_content(values, i, eventId, bottomLeftX, bottomLeftY, height, rotated, inverted);
         } else if (i >= 4 && i < 8) { //second
-            eventId = output_content(values, i, eventId, bottomLeft1X, bottomLeft1Y, height1);
+            eventId = output_content(values, i, eventId, bottomLeft1X, bottomLeft1Y, height1, rotated1, inverted1);
         } else if (i >= 8 && i < 12) { //third
-            eventId = output_content(values, i, eventId, bottomLeft2X, bottomLeft2Y, height2);
+            eventId = output_content(values, i, eventId, bottomLeft2X, bottomLeft2Y, height2, rotated2, inverted2);
         } else { // >= 12, fourth
-            eventId = output_content(values, i, eventId, bottomLeft3X, bottomLeft3Y, height3);
+            eventId = output_content(values, i, eventId, bottomLeft3X, bottomLeft3Y, height3, rotated3, inverted3);
         }
         values.clear();
 
@@ -553,13 +590,6 @@ int main()
         return 1;
     }
     cout << "Configuration file successfully read!";
-
-    /*cout << bottomLeftX << " " << bottomLeftY << endl;
-    cout << height << endl;
-    cout << sizePixel << endl;
-    cout << numberPixelsX << " " << numberPixelsY << endl;
-    cout << energy << endl;
-    cout << inputFileName << endl;*/
 
     if(mode == "finger") {
         cout << "Processing finger data..." << endl;
