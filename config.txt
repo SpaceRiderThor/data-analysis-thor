@@ -1,8 +1,8 @@
 mode instrument
-bottomLeftCorner0 0.0 0.0
-bottomLeftCorner1 0.0 0.0
-bottomLeftCorner2 0.0 0.0
-bottomLeftCorner3 0.0 0.0
+bottomLeftCorner0 0.0 1.546
+bottomLeftCorner1 0.0 1.546
+bottomLeftCorner2 0.0 1.546
+bottomLeftCorner3 0.0 1.546
 height 0.0 0.38 2.38 2.76
 rotated 0 1 0 1
 inverted 1 0 1 0
