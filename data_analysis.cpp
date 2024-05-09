@@ -371,11 +371,11 @@ void output_beginning(){
 
 int output_content(vector<vector<string>> data, int detectorId, int eventId, double bLeftX, double bLeftY, double z){
     float offset; //detextorSizeX -> detector length
-    if(detectorId == 0) {
+    if(detectorId % 4 == 0) {
         offset = 0; 
-    } else if (detectorId == 1) {
+    } else if (detectorId % 4 == 1) {
         offset = detectorSizeX + spacing_1_2; //0.1 -> 1mm between 1st and 2nd detectors
-    } else if (detectorId == 2) {
+    } else if (detectorId % 4 == 2) {
         offset = 2*detectorSizeX + spacing_1_2 + spacing_2_3; //0.5 -> distance between 2nd and 3rd detector
     } else {
         offset = 3*detectorSizeX + spacing_1_2 + spacing_2_3 + spacing_3_4; //0.1 -> 1mm between 3rd and 4th detectors
@@ -442,6 +442,8 @@ int quad(){
         }
     }
 
+    sort(files.begin(), files.end());
+
     vector<vector<string>> values;
     string s;
 
@@ -494,6 +496,8 @@ int instrument(){
             files.push_back(entry.path().string());
         }
     }
+    sort(files.begin(), files.end());
+
 
     int eventId = 1;
     string s = "";
@@ -534,7 +538,7 @@ int instrument(){
         }
         values.clear();
 
-        cout << "File " << i << " done." << endl;
+        //cout << "File " << i << " done." << endl;
     }
 
     output_end();
