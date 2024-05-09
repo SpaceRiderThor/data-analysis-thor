@@ -436,7 +436,7 @@ int output_content(vector<vector<string>> data, int detectorId, int eventId, dou
             if(rot == false || inv == false) {
                 outFile << "HT 8;" << ((stoi(data[i][1]) % 256))*sizePixel + bLeftX + offset << ";" << ((stoi(data[i][1])/256))*sizePixel + bLeftY << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
             } else {
-                outFile << "HT 8;" << 1.408 - (((stoi(data[i][1]) % 256))*sizePixel + bLeftX) + offset << ";" << 1.408 - (((stoi(data[i][1])/256))*sizePixel + bLeftY) << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
+                outFile << "HT 8;" << 1.408 - (((stoi(data[i][1]) % 256))*sizePixel) + bLeftX + offset << ";" << 1.408 - (((stoi(data[i][1])/256))*sizePixel )+ bLeftY << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
             }
 
         }
