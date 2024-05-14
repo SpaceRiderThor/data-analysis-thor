@@ -53,20 +53,21 @@ double spacing_3_4;
 
 // ------------------------------ AUXILIARY FUNCTIONS
 
-// trim from start
+// trim string from start
 inline void ltrim(string &s) {
     s.erase(s.begin(), find_if(s.begin(), s.end(), [](unsigned char ch) {
         return !isspace(ch);
     }));
 }
 
-// trim from end
+// trim string from end
 inline void rtrim(string &s) {
     s.erase(find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
         return !isspace(ch);
     }).base(), s.end());
 }
 
+// Converts energy values from ToT to KeV, usgin the ABCT files
 void convert_energy(vector<vector<string>>& data) {
     cout << "Converting energy from ToT to KeV..." << endl;
 
@@ -152,6 +153,7 @@ void convert_energy(vector<vector<string>>& data) {
 
 }
 
+// Reads the "config.txt" file, assigning the input values onte the respective variables
 int readConfig(){
     cout << "Reading configuration file..." << endl;
 
@@ -305,6 +307,7 @@ int readConfig(){
 
 // -------------------------- FINGER 
 
+// Outputs the data onto the output file, using the correct .evta format
 void create_output_file_finger(vector<vector<string>> data) {
     cout << "Writing data to output file..." << endl;
 
@@ -344,7 +347,7 @@ void create_output_file_finger(vector<vector<string>> data) {
     }
 }
 
-
+// Reads the values from the input file, calls convertion function (if necessary) and output function
 int finger() {
     fstream MyReadFile(inputFileName);
 
@@ -387,6 +390,7 @@ int finger() {
 
 // --------------------------------- QUAD
 
+// Writes the header on the ouput file
 void output_beginning(){
     ofstream outFile(filename);
 
@@ -401,6 +405,7 @@ void output_beginning(){
     }
 }
 
+//Writes the content body on the output file
 int output_content(vector<vector<string>> data, int detectorId, int eventId, double bLeftX, double bLeftY, double z, bool rot, bool inv){
     float offset; //detextorSizeX -> detector length
     if(detectorId % 4 == 0) {
@@ -449,10 +454,10 @@ int output_content(vector<vector<string>> data, int detectorId, int eventId, dou
 
     outFile.close();
 
-    //cout << "EVENTID: " << eventId << endl;
     return eventId;
 }
 
+// Writes the end/footer of the output file
 void output_end(){
     ofstream outFile;
     outFile.open(filename, ios_base::app);
@@ -466,6 +471,7 @@ void output_end(){
     }
 }
 
+// Reads input files (must be in alphabetical order), converts energy (if necessary) and calls output functions
 int quad(){
     output_beginning();
 
@@ -473,8 +479,6 @@ int quad(){
     vector<string> files;
     for (const auto &entry : fs::directory_iterator(inputFileName)) { 
         if (fs::is_regular_file(entry.path())) {
-            //cout << entry.path() << endl;
-            //ifstream file(entry.path());
             files.push_back(entry.path().string());
         }
     }
@@ -521,6 +525,7 @@ int quad(){
 
 // ------------------------------- INSTRUMENT
 
+// Reads data files (in aphabetical order), converts the energy if necessary and calls output functions
 int instrument(){
     output_beginning();
 
@@ -528,8 +533,6 @@ int instrument(){
     vector<string> files;
     for (const auto &entry : fs::directory_iterator(inputFileName)) { 
         if (fs::is_regular_file(entry.path())) {
-            //cout << entry.path() << endl;
-            //ifstream file(entry.path());
             files.push_back(entry.path().string());
         }
     }
@@ -575,7 +578,6 @@ int instrument(){
         }
         values.clear();
 
-        //cout << "File " << i << " done." << endl;
     }
 
     output_end();
