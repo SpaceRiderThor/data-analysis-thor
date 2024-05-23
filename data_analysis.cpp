@@ -51,6 +51,8 @@ double spacing_1_2;
 double spacing_2_3;
 double spacing_3_4;
 
+//#include "data_analysis.h"
+
 // ------------------------------ AUXILIARY FUNCTIONS
 
 // trim string from start
@@ -585,34 +587,5 @@ int instrument(){
     return 0;
 }
 
-int main()
-{
 
-    if(readConfig() == 1) {
-        return 1;
-    }
-    cout << "Configuration file successfully read!";
-
-    if(mode == "finger") {
-        cout << "Processing finger data..." << endl;
-        if(finger() == 1) {
-            return 1;
-        }
-    } else if (mode == "quad") {
-        cout << "Processing quad data..." << endl;
-        if(quad() == 1) {
-            return 1;
-        }
-    } else if (mode == "instrument") {
-        cout << "Processing instrument data..." << endl;
-        if(instrument() == 1) {
-            return 1;
-        }
-    } else {
-        cerr << "Wrong mode selected in config file!" << endl;
-        return 1;
-    }
-
-    return 0;
-}
 

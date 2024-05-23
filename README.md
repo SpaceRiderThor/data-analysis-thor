@@ -116,13 +116,13 @@ Compile and run the code. It will generate a *.evta* file in accordance to which
 
 On Windows:
 ```
-g++ -o output .\data_analysis.cpp
+g++ -o output .\main.cpp
 .\output.exe
 ```
 
 On Linux:
 ```
-cc data_analysis_finger.cpp -o output -std=c++17 -lstdc++ -lm
+cc main.cpp -o output -std=c++17 -lstdc++ -lm
 ./output
 ```
 
