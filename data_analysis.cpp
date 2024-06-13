@@ -17,6 +17,7 @@ using namespace std;
 
 string mode;
 string inputFileName;
+string abctFolder;
 
 double bottomLeftX;
 double bottomLeftY;
@@ -51,7 +52,6 @@ double spacing_1_2;
 double spacing_2_3;
 double spacing_3_4;
 
-//#include "data_analysis.h"
 
 // ------------------------------ AUXILIARY FUNCTIONS
 
@@ -76,7 +76,8 @@ void convert_energy(vector<vector<string>>& data) {
     // read abct files
     vector<vector<double>> a_list, b_list, c_list, t_list;
     float a, b, c, t;
-    ifstream fileA("ABCT_Files/Files_a.txt");
+    string aName = abctFolder + "/Files_a.txt";
+    ifstream fileA(aName);
     string s;
     vector<double> temp;
 
@@ -93,7 +94,8 @@ void convert_energy(vector<vector<string>>& data) {
     fileA.close();
     s = "";
 
-    ifstream fileB("ABCT_Files/Files_b.txt");
+    string bName = abctFolder + "/Files_b.txt";
+    ifstream fileB(bName);
     while(getline(fileB, s)) {
         stringstream ss(s);
         string token;
@@ -107,7 +109,8 @@ void convert_energy(vector<vector<string>>& data) {
     fileB.close();
     s = "";
 
-    ifstream fileC("ABCT_Files/Files_c.txt");
+    string cName = abctFolder + "/Files_c.txt";
+    ifstream fileC(cName);
     while(getline(fileC, s)) {
         stringstream ss(s);
         string token;
@@ -121,7 +124,8 @@ void convert_energy(vector<vector<string>>& data) {
     fileC.close();
     s = "";
 
-    ifstream fileT("ABCT_Files/Files_t.txt");
+    string tName = abctFolder + "/Files_t.txt";
+    ifstream fileT(tName);
     while(getline(fileT, s)) {
         stringstream ss(s);
         string token;
@@ -135,16 +139,24 @@ void convert_energy(vector<vector<string>>& data) {
     fileT.close();
     s = "";
 
+
+    int detector_len;
+    if(mode == "finger") {
+        detector_len = 256;
+    } else {
+        detector_len = 1024;
+    }
+
     // replace ToT with Energy in KeV
     for(int i = 0; i < data.size(); i++){ 
         if(i == 0) {
             continue;
         }
 
-        a = a_list[stoi(data[i][1])/256][stoi(data[i][1]) % 256];
-        b = b_list[stoi(data[i][1])/256][stoi(data[i][1]) % 256];
-        c = c_list[stoi(data[i][1])/256][stoi(data[i][1]) % 256];
-        t = t_list[stoi(data[i][1])/256][stoi(data[i][1]) % 256];
+        a = a_list[stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
+        b = b_list[stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
+        c = c_list[stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
+        t = t_list[stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
 
         float e = ((t*a - b + stoi(data[i][3]))/(2*a)) + sqrt(pow((t*a - b + stoi(data[i][3]))/(2*a), 2) - (t * (stoi(data[i][3]) - b) - c)/a);   
 
@@ -188,6 +200,12 @@ int readConfig(){
     mode = configValues[0][1];
 
     if(mode == "finger") {
+
+        if(configValues.size() != 8) {
+            cerr << "Wrong values/arguments in configuration!" << endl;
+            return 1;
+        }
+
         bottomLeftX = stod(configValues[1][1]);
         bottomLeftY = stod(configValues[1][2]);
         height = stod(configValues[2][1]);
@@ -201,8 +219,18 @@ int readConfig(){
             return 1;
         }
         inputFileName = configValues[6][1];
+        abctFolder = configValues[7][1];
+
+        rotated = false;
+        inverted = false;
 
     } else if (mode == "quad") {
+
+        if(configValues.size() != 9) {
+            cerr << "Wrong values/arguments in configuration!" << endl;
+            return 1;
+        }
+
         bottomLeftX = stod(configValues[1][1]);
         bottomLeftY = stod(configValues[1][2]);
         height = stod(configValues[2][1]);
@@ -219,8 +247,18 @@ int readConfig(){
             return 1;
         }
         inputFileName = configValues[7][1];
+        abctFolder = configValues[8][1];
+
+        rotated = false;
+        inverted = false;
 
     } else if (mode == "instrument") {
+
+        if(configValues.size() != 14) {
+            cerr << "Wrong values/arguments in configuration!" << endl;
+            return 1;
+        }
+
         bottomLeftX = stod(configValues[1][1]);
         bottomLeftY = stod(configValues[1][2]);
         height = stod(configValues[5][1]);
@@ -291,6 +329,7 @@ int readConfig(){
             return 1;
         }
         inputFileName = configValues[12][1];
+        abctFolder = configValues[13][1];
 
     } else {
         cerr << "Wrong mode selected in config file!" << endl;
@@ -310,17 +349,25 @@ int readConfig(){
 // -------------------------- FINGER 
 
 // Outputs the data onto the output file, using the correct .evta format
-void create_output_file_finger(vector<vector<string>> data) {
+int create_output_file_finger(vector<vector<string>> data) {
     cout << "Writing data to output file..." << endl;
 
     ofstream outFile(filename);
 
+
     if (outFile.is_open()) {
+
         outFile << "Version 200\n";
         outFile << "Type EVTA\n\n";
         
         int cont = 1;
         for(int i = 0; i < data.size(); i++) {
+
+            if(data[i].size() != 6) {
+                cerr << "Error: Wrong data in input file.\n";
+                return 1;
+            }
+
             if(i == 0 || (stoi(data[i][1]) % 256) == 0 || (stoi(data[i][1]) % 256) == 255 || (stoi(data[i][1])/256) == 0 || (stoi(data[i][1])/256) == 255){
                 continue;
             }
@@ -346,7 +393,10 @@ void create_output_file_finger(vector<vector<string>> data) {
         cout << "Data has been written!\n";
     } else {
         cerr << "Error: Unable to write into output file.\n";
+        return 1;
     }
+
+    return 0;
 }
 
 // Reads the values from the input file, calls convertion function (if necessary) and output function
@@ -408,9 +458,11 @@ void output_beginning(){
 }
 
 //Writes the content body on the output file
-int output_content(vector<vector<string>> data, int detectorId, int eventId, double bLeftX, double bLeftY, double z, bool rot, bool inv){
+int output_content(vector<vector<string>> data, int eventId, double bLeftX, double bLeftY, double z, bool rot, bool inv){
+    /*int detectorId = stoi(data[5]);
+
     float offset; //detextorSizeX -> detector length
-    if(detectorId % 4 == 0) {
+    if(stoi(data[5]) == 0) {
         offset = 0; 
     } else if (detectorId % 4 == 1) {
         offset = detectorSizeX + spacing_1_2; //0.1 -> 1mm between 1st and 2nd detectors
@@ -419,15 +471,31 @@ int output_content(vector<vector<string>> data, int detectorId, int eventId, dou
     } else {
         offset = 3*detectorSizeX + spacing_1_2 + spacing_2_3 + spacing_3_4; //0.1 -> 1mm between 3rd and 4th detectors
     }
-
+*/
     ofstream outFile;
     outFile.open(filename, ios_base::app);
 
+    int detectorId;
+    float offset; //detextorSizeX -> detector length
     if(outFile.is_open()){
         for(int i = 0; i < data.size(); i++) {
-            if(i == 0 || (stoi(data[i][1]) % 256) == 0 || (stoi(data[i][1]) % 256) == 255 || (stoi(data[i][1])/256) == 0 || (stoi(data[i][1])/256) == 255){
+
+            if(i == 0 || (stoi(data[i][1]) % 1024) == 0 || (stoi(data[i][1]) % 1024) == 1023 || (stoi(data[i][1])/1024) == 0 || (stoi(data[i][1])/1024) == 1023){
                 continue;
             }
+
+            detectorId = stoi(data[i][5]);
+
+            if(detectorId == 0) {
+                offset = 0; 
+            } else if (detectorId == 1) {
+                offset = spacing_1_2; //0.1 -> 1mm between 1st and 2nd detectors
+            } else if (detectorId == 2) {
+                offset = spacing_1_2 + spacing_2_3; //0.5 -> distance between 2nd and 3rd detector
+            } else {
+                offset = spacing_1_2 + spacing_2_3 + spacing_3_4; //0.1 -> 1mm between 3rd and 4th detectors
+            }
+
 
             if(stoi(data[i][1]) == 50904) {
                 continue;
@@ -440,15 +508,19 @@ int output_content(vector<vector<string>> data, int detectorId, int eventId, dou
             double time = (stod(data[i][2])*25 - stod(data[i][4])*1.5625) * 1e-9;
             outFile << "TI " << std::setprecision(9) << time << "\n";
 
-            if(rot == false || inv == false) {
-                outFile << "HT 8;" << ((stoi(data[i][1]) % 256))*sizePixel + bLeftX + offset << ";" << ((stoi(data[i][1])/256))*sizePixel + bLeftY << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
-            } else {
-                outFile << "HT 8;" << 1.408 - (((stoi(data[i][1]) % 256))*sizePixel) + bLeftX + offset << ";" << 1.408 - (((stoi(data[i][1])/256))*sizePixel )+ bLeftY << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
+            if(rot == false && inv == false) {
+                outFile << "HT 8;" << ((stoi(data[i][1]) % 1024))*sizePixel + bLeftX + offset << ";" << ((stoi(data[i][1])/1024))*sizePixel + bLeftY << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
+            } else if (rot == true && inv == false) {
+                outFile << "HT 8;" << 6.332 - (((stoi(data[i][1]) % 1024))*sizePixel) + bLeftX + offset << ";" << 1.408 - (((stoi(data[i][1])/1024))*sizePixel )+ bLeftY << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
+            } else if (rot == false && inv == true) {
+                //x, -y
+            } else if (rot == true && inv == true) {
+                // -x, y
             }
 
         }
 
-        cout << "File number " << detectorId+1 << " processed." << endl;
+        //cout << "File number " << detectorId+1 << " processed." << endl;
         outFile.close();
     } else {
         cerr << "Error: Unable to write content into output file.\n";
@@ -460,9 +532,9 @@ int output_content(vector<vector<string>> data, int detectorId, int eventId, dou
 }
 
 // Writes the end/footer of the output file
-void output_end(){
+void output_end(string file_name){
     ofstream outFile;
-    outFile.open(filename, ios_base::app);
+    outFile.open(file_name, ios_base::app);
 
     if(outFile.is_open()){
         outFile << "EN";
@@ -478,48 +550,51 @@ int quad(){
     output_beginning();
 
     //get files from folder
-    vector<string> files;
+    /*vector<string> files;
     for (const auto &entry : fs::directory_iterator(inputFileName)) { 
         if (fs::is_regular_file(entry.path())) {
             files.push_back(entry.path().string());
         }
-    }
+    }*/
 
-    sort(files.begin(), files.end());
+    //sort(files.begin(), files.end());
+
+    fstream MyReadFile(inputFileName);
 
     vector<vector<string>> values;
     string s;
 
     int eventId = 1;
 
-    for(int i = 0; i < files.size(); i++) {
-        s = "";
-        fstream MyReadFile(files[i]);
+    //for(int i = 0; i < files.size(); i++) {
+      //  s = "";
+        //fstream MyReadFile(files[i]);
 
-        while (getline(MyReadFile, s)) {
-            vector<string> t;
-            stringstream ss(s);
-            string token;
-            while(getline(ss, token, '\t')) {
-                ltrim(token);
-                rtrim(token);
+    while (getline(MyReadFile, s)) {
+        vector<string> t;
+        stringstream ss(s);
+        string token;
+        while(getline(ss, token, '\t')) {
+            ltrim(token);
+            rtrim(token);
 
-                t.push_back(token);
-            }
-
-            values.push_back(t);
-            t.clear();
+            t.push_back(token);
         }
 
-        if (energy == "tot") {
-            convert_energy(values);
-        }
-
-        eventId = output_content(values, i, eventId, bottomLeftX, bottomLeftY, height, false, false);
-        values.clear();
+        values.push_back(t);
+        t.clear();
     }
 
-    output_end();
+    if (energy == "tot") {
+        convert_energy(values);
+    }
+
+    //eventId = 
+    output_content(values, eventId, bottomLeftX, bottomLeftY, height, false, false);
+    values.clear();
+    //}
+
+    output_end(filename);
 
     return 0;
 }
@@ -539,7 +614,6 @@ int instrument(){
         }
     }
     sort(files.begin(), files.end());
-
 
     int eventId = 1;
     string s = "";
@@ -569,20 +643,20 @@ int instrument(){
             convert_energy(values);
         }   
 
-        if(i < 4) { //first (uppermost) quad
-            eventId = output_content(values, i, eventId, bottomLeftX, bottomLeftY, height, rotated, inverted);
-        } else if (i >= 4 && i < 8) { //second
-            eventId = output_content(values, i, eventId, bottomLeft1X, bottomLeft1Y, height1, rotated1, inverted1);
-        } else if (i >= 8 && i < 12) { //third
-            eventId = output_content(values, i, eventId, bottomLeft2X, bottomLeft2Y, height2, rotated2, inverted2);
+        if(i == 0) { //first (uppermost) quad
+            eventId = output_content(values, eventId, bottomLeftX, bottomLeftY, height, rotated, inverted);
+        } else if (i == 1) { //second
+            eventId = output_content(values, eventId, bottomLeft1X, bottomLeft1Y, height1, rotated1, inverted1);
+        } else if (i == 2) { //third
+            eventId = output_content(values, eventId, bottomLeft2X, bottomLeft2Y, height2, rotated2, inverted2);
         } else { // >= 12, fourth
-            eventId = output_content(values, i, eventId, bottomLeft3X, bottomLeft3Y, height3, rotated3, inverted3);
+            eventId = output_content(values, eventId, bottomLeft3X, bottomLeft3Y, height3, rotated3, inverted3);
         }
         values.clear();
 
     }
 
-    output_end();
+    output_end(filename);
 
     return 0;
 }

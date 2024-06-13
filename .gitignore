@@ -4,7 +4,7 @@
 !data_files/instrument_test/*
 
 */*.evta
-*/*.tra
+*.tra
 */output
 */output.exe
 

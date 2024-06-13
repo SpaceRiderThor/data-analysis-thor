@@ -2,9 +2,9 @@ CXX = g++
 CXXFLAGS = -I/home/ubuntu/Desktop/googletest/googletest/include -std=c++17
 LDFLAGS = -I/home/ubuntu/Desktop/googletest/build -lgtest -lgtest_main -lpthread
 
-SRC = test_example.cpp
+SRC = unit_tests.cpp
 OBJ = $(SRC:.cpp=.o)
-EXE = test_example
+EXE = unit_tests
 
 
 all: $(EXE)

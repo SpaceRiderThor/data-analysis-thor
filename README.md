@@ -27,6 +27,7 @@ sizePixel 0.0055
 detectorSize 1.408 1.408
 energy kev
 dataFile data_files/Ba133_colimated1cm-calibrated.t3pa
+abct ABCT_Files/finger
 ```
 
 * **mode finger** - Denotes that the program is expecting arguments for a finger.
@@ -36,6 +37,7 @@ dataFile data_files/Ba133_colimated1cm-calibrated.t3pa
 * **detectorSize 1.408 1.408** - The detector's measurements are 1.408 by 1.408 centimeters.
 * **energy kev**  - The input file's energy value is in KeV. If the values are in ToT, "kev" shall be replaced by "tot" in order for the values to be converted.
 * **dataFile data_files/Ba133_colimated1cm-calibrated.t3pa** - The input file's path.
+* **abct ABCT_Files/finger** - Path to the detector's ABCT files folder. The files should be named "Files_a.txt", "Files_b.txt", "Files_c.txt" and "Files_t.txt" for each corresponding variable.
 
 ### Quad
 
@@ -48,6 +50,7 @@ sizePixel 0.0055
 detectorSize 1.408 1.408
 energy kev
 dataFile data_files/quad_test
+abct ABCT_Files/quad_test
 ```
 
 Differences from the previous configuration:
@@ -71,6 +74,7 @@ sizePixel 0.0055
 detectorSize 1.408 1.408
 energy kev
 dataFile data_files/instrument_test
+abct ABCT_Files/quad_test
 ```
 
 * **mode instrument** - The mode is now selected as "instrument".
