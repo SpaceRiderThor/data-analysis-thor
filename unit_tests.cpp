@@ -4,17 +4,45 @@
 
 // convert_energy
 
-class Convert_EnergyTests : public ::testing::Test {
+class ConvertEnergyTests : public ::testing::Test {
     protected:
+    vector<vector<string>> data;
     void SetUp() override {
-        
+        readConfig();
+        createTestData();
     }
 
     void TearDown() override {
 
     }
+
+    void createTestData() {
+        vector<string> v0{"Index", "Matrix Index", "ToA", "Energy", "FToA", "Overflow"};
+        vector<string> v1{ "0", "10000", "442954", "8", "17", "0" }; 
+        vector<string> v2{ "1", "10020", "442956", "6", "24", "0" };
+        vector<string> v3{ "2", "20030", "442953", "30", "20", "0" };  
+        data.push_back(v0); 
+        data.push_back(v1); 
+        data.push_back(v2); 
+        data.push_back(v3);        
+    }
+}; 
+
+TEST_F(ConvertEnergyTests, CorrectOutputFinger) {
+    convert_energy(data);
+
+    EXPECT_EQ(data[1][3], "5.485935");
+    EXPECT_EQ(data[2][3], "5.363125");
+    EXPECT_EQ(data[3][3], "25.132481");
 };
 
+TEST_F(ConvertEnergyTests, CorrectOutputQuad) {
+    
+};
+
+TEST_F(ConvertEnergyTests, CorrectOutputInstrument) {
+
+};
 
 
 
@@ -245,12 +273,47 @@ TEST_F(OutputBeginningTests, HandlesFileOpenError) {
 
     string errorMessage = buffer.str();
     EXPECT_NE(errorMessage.find("Error: Unable to write headers into output file."), string::npos);
-
-    // Restore permissions and original stderr        remove(filename);
-
 }
 
 // output_content
+
+class OutputContentTests : public ::testing::Test {
+    protected:
+    vector<vector<string>> data;
+    int eventId;
+
+    void SetUp() override {
+        remove(filename);
+        readConfig();
+        output_beginning();
+
+        createTestData();
+    }
+
+    void TearDown() override {
+        remove(filename);
+    }
+
+    void createTestData() {
+        vector<string> v1{ "0", "10000", "442954", "8", "17", "0" }; 
+        vector<string> v2{ "1", "10020", "442956", "6", "24", "0" };
+        vector<string> v3{ "2", "20030", "442953", "30", "20", "0" };   
+        data.push_back(v1); 
+        data.push_back(v2); 
+        data.push_back(v3);        
+    }
+};
+
+TEST_F(OutputContentTests, CorrectOutput) {
+    EXPECT_EQ(output_content(data, 1, 0, 0, 0, false, false), data.size());
+};
+
+TEST_F(OutputContentTests, wrongData) {
+    vector<string> v{"0", "1", "a"};
+    data.push_back(v);
+
+    EXPECT_EQ(output_content(data, 1, 0, 0, 0, false, false), 1);
+};
 
 
 
@@ -328,9 +391,59 @@ TEST_F(OutputEndTests, HandleFileOpenError) {
     std::cerr.rdbuf(old); 
 }
 
+// quad
+
+class QuadTests : public ::testing::Test {
+    protected:
+    // remove pre-existing files
+    void SetUp() override {
+        readConfig();
+    }
+
+    // remove files created during tests 
+    void TearDown() override {
+    }
+};
+
+TEST_F(QuadTests, SuccessfulRun) {
+    EXPECT_EQ(quad(), 0);
+}
+
+TEST_F(QuadTests, NoInputFile) {
+    inputFileName = "non_existent/file.txt";
+
+    EXPECT_EQ(quad(), 1);
+
+} 
+
+// instrument
+
+class InstrumentTests : public ::testing::Test {
+    protected:
+    // remove pre-existing files
+    void SetUp() override {
+        readConfig();
+    }
+
+    // remove files created during tests
+    void TearDown() override {
+    }
+};
+
+TEST_F(InstrumentTests, SuccessfulRun) {
+    EXPECT_EQ(instrument(), 0);
+}
+
+TEST_F(InstrumentTests, NoInputFile) {
+    inputFileName = "non_existent/directory";
+
+    EXPECT_EQ(instrument(), 1);
+
+} 
 
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
+    ::testing::GTEST_FLAG(filter) = "ConvertEnergyTests.*";
     return RUN_ALL_TESTS();
 }

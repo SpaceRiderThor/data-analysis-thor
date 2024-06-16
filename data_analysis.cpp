@@ -262,6 +262,7 @@ void convert_energy(vector<vector<string>>& data) {
     } else { // instrument
 
     }
+
     
     cout << "Conversion finished!" << endl;
 
@@ -565,9 +566,16 @@ int output_content(vector<vector<string>> data, int eventId, double bLeftX, doub
     int fullDetectorLength = detectorSizeX*4 + spacing_1_2 + spacing_2_3 + spacing_3_4;
     int detectorId;
     float offset; //detextorSizeX -> detector length
+
     if(outFile.is_open()){
+
         for(int i = 0; i < data.size(); i++) {
-            
+
+            if(data[i].size() != 6) {
+                cerr << "Error: Wrong data in input file.\n";
+                return 1;
+            }
+
             if(i == 0 || (stoi(data[i][1]) % 1024) == 0 || (stoi(data[i][1]) % 1024) == 1023 || (stoi(data[i][1])/1024) == 0 || (stoi(data[i][1])/1024) == 1023){
                 continue;
             }
@@ -592,7 +600,7 @@ int output_content(vector<vector<string>> data, int eventId, double bLeftX, doub
             outFile << "SE\n";
             outFile << "ID " << eventId << "\n";
             eventId++;
-
+            
             double time = (stod(data[i][2])*25 - stod(data[i][4])*1.5625) * 1e-9;
             outFile << "TI " << std::setprecision(9) << time << "\n";
 
@@ -637,26 +645,17 @@ void output_end(string file_name){
 int quad(){
     output_beginning();
 
-    //get files from folder
-    /*vector<string> files;
-    for (const auto &entry : fs::directory_iterator(inputFileName)) { 
-        if (fs::is_regular_file(entry.path())) {
-            files.push_back(entry.path().string());
-        }
-    }*/
-
-    //sort(files.begin(), files.end());
-
     fstream MyReadFile(inputFileName);
+
+    if(!MyReadFile.is_open()){
+        cerr << "Error: Unable to open input file.\n";
+        return 1;
+    } 
 
     vector<vector<string>> values;
     string s;
 
     int eventId = 1;
-
-    //for(int i = 0; i < files.size(); i++) {
-      //  s = "";>= 12,
-        //fstream MyReadFile(files[i]);
 
     while (getline(MyReadFile, s)) {
         vector<string> t;
@@ -696,10 +695,15 @@ int instrument(){
 
     //get files from folder
     vector<string> files;
-    for (const auto &entry : fs::directory_iterator(inputFileName)) { 
-        if (fs::is_regular_file(entry.path())) {
-            files.push_back(entry.path().string());
+    if(fs::exists(inputFileName) && fs::is_directory(inputFileName)) {
+        for (const auto &entry : fs::directory_iterator(inputFileName)) { 
+            if (fs::is_regular_file(entry.path())) {
+                files.push_back(entry.path().string());
+            }
         }
+    } else {
+        cerr << "Directory does not exist or is not a directory: " << inputFileName << std::endl;
+        return 1;
     }
     sort(files.begin(), files.end());
 
