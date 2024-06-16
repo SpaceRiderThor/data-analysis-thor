@@ -73,96 +73,196 @@ inline void rtrim(string &s) {
 void convert_energy(vector<vector<string>>& data) {
     cout << "Converting energy from ToT to KeV..." << endl;
 
-    // read abct files
-    vector<vector<double>> a_list, b_list, c_list, t_list;
-    float a, b, c, t;
-    string aName = abctFolder + "/Files_a.txt";
-    ifstream fileA(aName);
-    string s;
-    vector<double> temp;
-
-    while(getline(fileA, s)) {
-        stringstream ss(s);
-        string token;
-        while(getline(ss, token, ' ')) {
-            temp.push_back(stof(token));
-        }
-
-        a_list.push_back(temp);
-        temp.clear();
-    }
-    fileA.close();
-    s = "";
-
-    string bName = abctFolder + "/Files_b.txt";
-    ifstream fileB(bName);
-    while(getline(fileB, s)) {
-        stringstream ss(s);
-        string token;
-        while(getline(ss, token, ' ')) {
-            temp.push_back(stof(token));
-        }
-
-        b_list.push_back(temp);
-        temp.clear();
-    }
-    fileB.close();
-    s = "";
-
-    string cName = abctFolder + "/Files_c.txt";
-    ifstream fileC(cName);
-    while(getline(fileC, s)) {
-        stringstream ss(s);
-        string token;
-        while(getline(ss, token, ' ')) {
-            temp.push_back(stof(token));
-        }
-
-        c_list.push_back(temp);
-        temp.clear();
-    }
-    fileC.close();
-    s = "";
-
-    string tName = abctFolder + "/Files_t.txt";
-    ifstream fileT(tName);
-    while(getline(fileT, s)) {
-        stringstream ss(s);
-        string token;
-        while(getline(ss, token, ' ')) {
-            temp.push_back(stof(token));
-        }
-
-        t_list.push_back(temp);
-        temp.clear();
-    }
-    fileT.close();
-    s = "";
-
-
     int detector_len;
-    if(mode == "finger") {
-        detector_len = 256;
-    } else {
-        detector_len = 1024;
-    }
+    float a, b, c, t;
 
-    // replace ToT with Energy in KeV
-    for(int i = 0; i < data.size(); i++){ 
-        if(i == 0) {
-            continue;
+    if (mode == "finger") {
+
+        // read abct files
+        vector<vector<double>> a_list, b_list, c_list, t_list;
+        string aName = abctFolder + "/Files_a.txt";
+        ifstream fileA(aName);
+        string s;
+        vector<double> temp;
+
+        while(getline(fileA, s)) {
+            stringstream ss(s);
+            string token;
+            while(getline(ss, token, ' ')) {
+                temp.push_back(stof(token));
+            }
+
+            a_list.push_back(temp);
+            temp.clear();
+        }
+        fileA.close();
+        s = "";
+
+        string bName = abctFolder + "/Files_b.txt";
+        ifstream fileB(bName);
+        while(getline(fileB, s)) {
+            stringstream ss(s);
+            string token;
+            while(getline(ss, token, ' ')) {
+                temp.push_back(stof(token));
+            }
+
+            b_list.push_back(temp);
+            temp.clear();
+        }
+        fileB.close();
+        s = "";
+
+        string cName = abctFolder + "/Files_c.txt";
+        ifstream fileC(cName);
+        while(getline(fileC, s)) {
+            stringstream ss(s);
+            string token;
+            while(getline(ss, token, ' ')) {
+                temp.push_back(stof(token));
+            }
+
+            c_list.push_back(temp);
+            temp.clear();
+        }
+        fileC.close();
+        s = "";
+
+        string tName = abctFolder + "/Files_t.txt";
+        ifstream fileT(tName);
+        while(getline(fileT, s)) {
+            stringstream ss(s);
+            string token;
+            while(getline(ss, token, ' ')) {
+                temp.push_back(stof(token));
+            }
+
+            t_list.push_back(temp);
+            temp.clear();
+        }
+        fileT.close();
+        s = "";
+
+        detector_len = 256;
+
+            // replace ToT with Energy in KeV
+        for(int i = 0; i < data.size(); i++){ 
+            if(i == 0) {
+                continue;
+            }
+
+            a = a_list[stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
+            b = b_list[stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
+            c = c_list[stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
+            t = t_list[stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
+
+            float e = ((t*a - b + stoi(data[i][3]))/(2*a)) + sqrt(pow((t*a - b + stoi(data[i][3]))/(2*a), 2) - (t * (stoi(data[i][3]) - b) - c)/a);   
+
+            data[i][3] = to_string(e);
+        }
+    } else if (mode == "quad") {
+
+        detector_len = 1024;
+        vector<vector<vector<double>>> a_quad, b_quad, c_quad, t_quad;        
+
+        //read abct files for each finger
+        for(int i = 0; i < 4; i++) {
+            vector<vector<double>> a_list, b_list, c_list, t_list;
+            float a, b, c, t;
+            string s;
+            vector<double> temp;
+
+            string aName = abctFolder + "/" + to_string(i) + "/Files_a.txt";
+            ifstream fileA(aName);
+            while(getline(fileA, s)) {
+                stringstream ss(s);
+                string token;
+                while(getline(ss, token, ' ')) {
+                    temp.push_back(stof(token));
+                }
+
+                a_list.push_back(temp);
+                temp.clear();
+            }
+            fileA.close();
+            s = "";
+
+            string bName = abctFolder + "/" + to_string(i) + "/Files_b.txt";
+            ifstream fileB(bName);
+            while(getline(fileB, s)) {
+                stringstream ss(s);
+                string token;
+                while(getline(ss, token, ' ')) {
+                    temp.push_back(stof(token));
+                }
+
+                b_list.push_back(temp);
+                temp.clear();
+            }
+            fileB.close();
+            s = "";
+
+            string cName = abctFolder + "/" + to_string(i) + "/Files_c.txt";
+            ifstream fileC(cName);
+            while(getline(fileC, s)) {
+                stringstream ss(s);
+                string token;
+                while(getline(ss, token, ' ')) {
+                    temp.push_back(stof(token));
+                }
+
+                c_list.push_back(temp);
+                temp.clear();
+            }
+            fileC.close();
+            s = "";
+
+            string tName = abctFolder + "/" + to_string(i) + "/Files_t.txt";
+            ifstream fileT(tName);
+            while(getline(fileT, s)) {
+                stringstream ss(s);
+                string token;
+                while(getline(ss, token, ' ')) {
+                    temp.push_back(stof(token));
+                }
+
+                t_list.push_back(temp);
+                temp.clear();
+            }
+            fileT.close();
+            s = "";
+
+            a_quad.push_back(a_list);
+            b_quad.push_back(b_list);
+            c_quad.push_back(c_list);
+            t_quad.push_back(t_list);
+            a_list.clear();
+            b_list.clear();
+            c_list.clear();
+            t_list.clear();
         }
 
-        a = a_list[stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
-        b = b_list[stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
-        c = c_list[stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
-        t = t_list[stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
+        // replace ToT with Energy in KeV
+        for(int i = 0; i < data.size(); i++){ 
+            if(i == 0) {
+                continue;
+            }
 
-        float e = ((t*a - b + stoi(data[i][3]))/(2*a)) + sqrt(pow((t*a - b + stoi(data[i][3]))/(2*a), 2) - (t * (stoi(data[i][3]) - b) - c)/a);   
+            a = a_quad[stoi(data[i][5])][stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
+            b = b_quad[stoi(data[i][5])][stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
+            c = c_quad[stoi(data[i][5])][stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
+            t = t_quad[stoi(data[i][5])][stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
 
-        data[i][3] = to_string(e);
+            float e = ((t*a - b + stoi(data[i][3]))/(2*a)) + sqrt(pow((t*a - b + stoi(data[i][3]))/(2*a), 2) - (t * (stoi(data[i][3]) - b) - c)/a);   
+
+            data[i][3] = to_string(e);
+        }
+
+
+    } else { // instrument
+
     }
-
+    
     cout << "Conversion finished!" << endl;
 
 }
@@ -459,27 +559,15 @@ void output_beginning(){
 
 //Writes the content body on the output file
 int output_content(vector<vector<string>> data, int eventId, double bLeftX, double bLeftY, double z, bool rot, bool inv){
-    /*int detectorId = stoi(data[5]);
-
-    float offset; //detextorSizeX -> detector length
-    if(stoi(data[5]) == 0) {
-        offset = 0; 
-    } else if (detectorId % 4 == 1) {
-        offset = detectorSizeX + spacing_1_2; //0.1 -> 1mm between 1st and 2nd detectors
-    } else if (detectorId % 4 == 2) {
-        offset = 2*detectorSizeX + spacing_1_2 + spacing_2_3; //0.5 -> distance between 2nd and 3rd detector
-    } else {
-        offset = 3*detectorSizeX + spacing_1_2 + spacing_2_3 + spacing_3_4; //0.1 -> 1mm between 3rd and 4th detectors
-    }
-*/
     ofstream outFile;
     outFile.open(filename, ios_base::app);
 
+    int fullDetectorLength = detectorSizeX*4 + spacing_1_2 + spacing_2_3 + spacing_3_4;
     int detectorId;
     float offset; //detextorSizeX -> detector length
     if(outFile.is_open()){
         for(int i = 0; i < data.size(); i++) {
-
+            
             if(i == 0 || (stoi(data[i][1]) % 1024) == 0 || (stoi(data[i][1]) % 1024) == 1023 || (stoi(data[i][1])/1024) == 0 || (stoi(data[i][1])/1024) == 1023){
                 continue;
             }
@@ -508,14 +596,14 @@ int output_content(vector<vector<string>> data, int eventId, double bLeftX, doub
             double time = (stod(data[i][2])*25 - stod(data[i][4])*1.5625) * 1e-9;
             outFile << "TI " << std::setprecision(9) << time << "\n";
 
-            if(rot == false && inv == false) {
+            if(rot == false && inv == false) { //x, y
                 outFile << "HT 8;" << ((stoi(data[i][1]) % 1024))*sizePixel + bLeftX + offset << ";" << ((stoi(data[i][1])/1024))*sizePixel + bLeftY << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
-            } else if (rot == true && inv == false) {
-                outFile << "HT 8;" << 6.332 - (((stoi(data[i][1]) % 1024))*sizePixel) + bLeftX + offset << ";" << 1.408 - (((stoi(data[i][1])/1024))*sizePixel )+ bLeftY << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
-            } else if (rot == false && inv == true) {
-                //x, -y
-            } else if (rot == true && inv == true) {
-                // -x, y
+            } else if (rot == true && inv == false) { //-x, -y
+                outFile << "HT 8;" << fullDetectorLength - (((stoi(data[i][1]) % 1024))*sizePixel + offset) + bLeftX << ";" << detectorSizeY - (((stoi(data[i][1])/1024))*sizePixel) + bLeftY << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
+            } else if (rot == false && inv == true) { //x, -y
+                outFile << "HT 8;" << ((stoi(data[i][1]) % 1024))*sizePixel + bLeftX + offset << ";" << detectorSizeY - (((stoi(data[i][1])/1024))*sizePixel) + bLeftY << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
+            } else if (rot == true && inv == true) { //-x, y
+                outFile << "HT 8;" << fullDetectorLength - (((stoi(data[i][1]) % 1024))*sizePixel + offset) + bLeftX << ";" << ((stoi(data[i][1])/1024))*sizePixel + bLeftY << ";" << z << ";" << stoi(data[i][3]) << ";" << sizePixel/2 << ";" << sizePixel/2 << ";" << 0 << ";" << 0.5 << "\n"; //HT detectorID;x;y;z;energy;x_uncertainty;y_uncertainty;z_uncertainty;energy_uncertainty --- shift of half a pixel to the right
             }
 
         }
@@ -567,7 +655,7 @@ int quad(){
     int eventId = 1;
 
     //for(int i = 0; i < files.size(); i++) {
-      //  s = "";
+      //  s = "";>= 12,
         //fstream MyReadFile(files[i]);
 
     while (getline(MyReadFile, s)) {
@@ -649,7 +737,7 @@ int instrument(){
             eventId = output_content(values, eventId, bottomLeft1X, bottomLeft1Y, height1, rotated1, inverted1);
         } else if (i == 2) { //third
             eventId = output_content(values, eventId, bottomLeft2X, bottomLeft2Y, height2, rotated2, inverted2);
-        } else { // >= 12, fourth
+        } else { // fourth
             eventId = output_content(values, eventId, bottomLeft3X, bottomLeft3Y, height3, rotated3, inverted3);
         }
         values.clear();

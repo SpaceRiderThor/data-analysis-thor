@@ -6,4 +6,3 @@ detectorSize 1.408 1.408
 energy kev
 dataFile data_files/Ba133_colimated1cm-calibrated.t3pa
 abct ABCT_Files/finger
-

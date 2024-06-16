@@ -12,4 +12,3 @@ detectorSize 1.408 1.408
 energy kev
 dataFile data_files/instrument_test
 abct ABCT_Files/quad_test
-

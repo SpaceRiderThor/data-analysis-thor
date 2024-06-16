@@ -6,7 +6,7 @@ int main()
     if(readConfig() == 1) {
         return 1;
     }
-    cout << "Configuration file successfully read!";
+    cout << "Configuration file successfully read!" << endl;
 
     if(mode == "finger") {
         cout << "Processing finger data..." << endl;
