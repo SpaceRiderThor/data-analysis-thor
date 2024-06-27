@@ -11,4 +11,4 @@ sizePixel 0.0055
 detectorSize 1.408 1.408
 energy kev
 dataFile data_files/instrument_test
-abct ABCT_Files/quad_test
+abct ABCT_Files/instrument_test

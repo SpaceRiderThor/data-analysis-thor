@@ -70,7 +70,7 @@ inline void rtrim(string &s) {
 }
 
 // Converts energy values from ToT to KeV, usgin the ABCT files
-void convert_energy(vector<vector<string>>& data) {
+void convert_energy(vector<vector<string>>& data, int quadID) {
     cout << "Converting energy from ToT to KeV..." << endl;
 
     int detector_len;
@@ -260,6 +260,103 @@ void convert_energy(vector<vector<string>>& data) {
 
 
     } else { // instrument
+        detector_len = 1024;
+        vector<vector<vector<double>>> a_quad, b_quad, c_quad, t_quad;        
+
+        //reach abct files for each finger
+        for(int i = 0; i < 4; i++) {
+            vector<vector<double>> a_list, b_list, c_list, t_list;
+            float a, b, c, t;
+            string s;
+            vector<double> temp;
+
+            string aName = abctFolder + "/" + to_string(quadID) + "/" + to_string(i) + "/Files_a.txt";
+            ifstream fileA(aName);
+            while(getline(fileA, s)) {
+                stringstream ss(s);
+                string token;
+                while(getline(ss, token, ' ')) {
+                    temp.push_back(stof(token));
+                }
+
+                a_list.push_back(temp);
+                temp.clear();
+            }
+            fileA.close();
+            s = "";
+
+            string bName = abctFolder + "/" + to_string(quadID) + "/" + to_string(i) + "/Files_b.txt";
+            ifstream fileB(bName);
+            while(getline(fileB, s)) {
+                stringstream ss(s);
+                string token;
+                while(getline(ss, token, ' ')) {
+                    temp.push_back(stof(token));
+                }
+
+                b_list.push_back(temp);
+                temp.clear();
+            }
+            fileB.close();
+            s = "";
+
+            string cName = abctFolder + "/" + to_string(quadID) + "/" + to_string(i) + "/Files_c.txt";
+            ifstream fileC(cName);
+            while(getline(fileC, s)) {
+                stringstream ss(s);
+                string token;
+                while(getline(ss, token, ' ')) {
+                    temp.push_back(stof(token));
+                }
+
+                c_list.push_back(temp);
+                temp.clear();
+            }
+            fileC.close();
+            s = "";
+
+            string tName = abctFolder + "/" + to_string(quadID) + "/" + to_string(i) + "/Files_t.txt";
+            ifstream fileT(tName);
+            while(getline(fileT, s)) {
+                stringstream ss(s);
+                string token;
+                while(getline(ss, token, ' ')) {
+                    temp.push_back(stof(token));
+                }
+
+                t_list.push_back(temp);
+                temp.clear();
+            }
+            fileT.close();
+            s = "";
+
+            a_quad.push_back(a_list);
+            b_quad.push_back(b_list);
+            c_quad.push_back(c_list);
+            t_quad.push_back(t_list);
+            a_list.clear();
+            b_list.clear();
+            c_list.clear();
+            t_list.clear();
+        }
+
+        // replace ToT with Energy in KeV
+        for(int i = 0; i < data.size(); i++){ 
+            if(i == 0) {
+                continue;
+            }
+
+            a = a_quad[stoi(data[i][5])][stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
+            b = b_quad[stoi(data[i][5])][stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
+            c = c_quad[stoi(data[i][5])][stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
+            t = t_quad[stoi(data[i][5])][stoi(data[i][1])/detector_len][stoi(data[i][1]) % detector_len];
+
+            float e = ((t*a - b + stoi(data[i][3]))/(2*a)) + sqrt(pow((t*a - b + stoi(data[i][3]))/(2*a), 2) - (t * (stoi(data[i][3]) - b) - c)/a);   
+
+            data[i][3] = to_string(e);
+        }
+
+
 
     }
 
@@ -532,7 +629,7 @@ int finger() {
     }
     
     if (energy == "tot") { 
-        convert_energy(values); // if energy is in ToT instead of KeV
+        convert_energy(values, 0); // if energy is in ToT instead of KeV
     }
 
     create_output_file_finger(values);
@@ -673,7 +770,7 @@ int quad(){
     }
 
     if (energy == "tot") {
-        convert_energy(values);
+        convert_energy(values, 0);
     }
 
     //eventId = 
@@ -732,7 +829,7 @@ int instrument(){
         }
 
         if (energy == "tot") {
-            convert_energy(values);
+            convert_energy(values, i);
         }   
 
         if(i == 0) { //first (uppermost) quad
