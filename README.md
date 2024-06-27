@@ -56,7 +56,7 @@ abct ABCT_Files/quad_test
 Differences from the previous configuration:
 * **mode quad** - The mode is now select as "quad".
 * **spaceBetween 0.1 0.5 0.1** - This line indicates that the space between the first and second finger is 0.1cm, between the second and third finger is 0.5cm and between the third and fourth finger is 0.1cm.
-* **dataFile data_files/quad_test** - Each finger shall have its respective data file. In this case, stored in the "quad_test" folder. The files shall be ordered alphabetically, from the leftmost to the rightmost detector (finger).
+* **abct ABCT_Files/quad_test** - Each detector's ABCT files must be in a separate folder, numbered from 0 to 3, 0 being the leftmost finger, and 3 the farthest one on the right.
 
 ### Instrument
 
@@ -79,9 +79,11 @@ abct ABCT_Files/quad_test
 
 * **mode instrument** - The mode is now selected as "instrument".
 * **bottomLeftCorner0 0.0 1.546** - Each quad now has its own separate coordinates, identified from 0 to 3, from the uppermost to the lowest one.
-* **height 0.0 0.38 2.38 2.76** - The height of each quad, in centimeters, from the lowest to the highest.
+* **height 0.0 0.38 2.38 2.76** - The height of each quad, in centimetres, from the lowest to the highest.
 * **rotated 1 0 1 0** - Represents if each quad is rotated 180 degrees around the z axis. 1 for rotated quads, 0 for not rotated.
 * **inverted 1 0 1 0** - Represents if each quad is rotated 180 around the x axis. 1 for inverted quads, 0 for not rotated.
+* **dataFile data_files/instrument_test** - The input files are located in this folder. They must be ordered alphabetically, the uppermost quad being the first, while the fourth is the last in this order.
+* **abct ABCT_Files/quad_test** - Each quad's folders are placed in the respective folders numbered from 0 to 3, from the uppermost quad to the lowest. Then, inside each quad's folder, each finger detector's ABCT files must also be in a separate folder, numbered from 0 to 3, 0 being the leftmost finger, and 3 the farthest one on the right.
 
 
 ### Note regarding the energy conversion
